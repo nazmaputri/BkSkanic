@@ -25,7 +25,7 @@ class BookingController extends Controller
 
         //append query string to paginate links
         $bookings->appends(['search' => request()->search]);
-
+            
         //return with Api Resource
         return new BookingResource(true, 'List Data Bookings', $bookings);
     }
@@ -39,10 +39,9 @@ class BookingController extends Controller
     public function store (Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image'       => 'required|image|mimes:jpeg,jpg,png|max:2000',
-            'title'       => 'required|unique:posts',
-            'category_id' => 'required',
-            'content'     => 'required'
+            'user_id'       => 'required|exists:users,id',
+            'booking_start' => 'required|date',
+            'booking_end'   => 'required|date|after:booking_start'
         ]);
 
         if ($validator->fails()) {
@@ -51,8 +50,6 @@ class BookingController extends Controller
         }  
 
         //upload image
-        $image = $request->file('image');
-        $image->storeAs('public/posts', $image->hashName());
 
         $post  = Post::create([
             'image'       => $image->hashName(),
@@ -114,9 +111,9 @@ class BookingController extends Controller
     public function update (Request $request, Post $post)
     {
         $validator = Validator::make($request->all(), [
-            'title'       => 'required|unique:posts, title,'.$post->id,
-            'category_id' => 'required',
-            'content'     => 'required'
+            'user_id'       => 'required|unique:posts, title,'.$post->id,
+            'booking_start' => 'required',
+            'booking_end'   => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -145,7 +142,7 @@ class BookingController extends Controller
         }   
 
             $post->update([
-                'title'       => $request->title,
+                    'title'       => $request->title,
                     'slug'        => Str::slug($request->title, '-'),
                     'category_id' => $request->category_id,
                     'user_id'     => auth()->guard('api')->user()->id,

@@ -26,7 +26,7 @@ class BookingResource extends JsonResource
     {
         // return parent::toArray($request);
         return[
-            'success'  => $this->status,
+            'success'   => $this->status,
             'message'   => $this->message,
             'data'      => $this->resource,
         ];

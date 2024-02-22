@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Public;
 
 use App\Models\Submission;
 use Illuminate\Support\Str;
@@ -19,16 +19,16 @@ class SubmissionController extends Controller
      */
     public function index()
     {
-        //get categories
+        
         $submissions = Submission::when(request()->search, function($submissions) {
-            $submissions = $submissions->where('name', 'like', '%' . request()->search . '%');
+            $submissions = $submissions->where('nama', 'like', '%' . request()->search . '%');
         })->latest()->paginate(5);
 
         //append query string to pagination links
         $submissions->appends(['search' => request()->search]);
 
         //return with Api Resource
-        return new SubmissionsResource(true, 'List Data Categories', $submissions);
+        return new SubmissionResource(true, 'List Data Submissions', $submissions);
     }
 
     /**
@@ -40,32 +40,37 @@ class SubmissionController extends Controller
      public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required|mimes:jpeg,jpg,png|max:2000',
-            'name'  => 'required|unique:categories',
+            'nama'  => 'required',
+            'email' => 'required',
+            'nama_siswa'  => 'required',
+            'kelas' => 'required',
+            'sebagai' => 'required', 
+            'deskripsi' => 'required', 
+            'masalah' => 'required', 
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
-        //upload image
-        $image = $request->file('image');
-        $image->storeAs('public/categories', $image->hashName());
-
-        //create category
-        $category = Category::create([
-            'image' => $image->hashName(),
-            'name'  => $request->name,
-            'slug'  => Str::slug($request->name, '-'),
+    
+       
+        $submission = Submission::create([
+            'nama'  => $request->nama,
+            'email' => $request->email,
+            'kelas' => $request->kelas,
+            'nama_siswa'  => $request->nama_siswa,
+            'sebagai' => $request->sebagai,
+            'deskripsi' => $request->deskripsi, 
+            'masalah' => $request->masalah, 
         ]);
 
-        if ($category) {
+        if ($submission) {
             //return success with Api Resource
-            return new CategoryResource(true, 'Data Category Berhasil Disimpan!', $category);
+            return new SubmissionResource(true, 'Data Submission Berhasil Disimpan!', $submission);
         }
 
         //return failed with Api Resource
-        return new CategoryResource(false, 'Data Category Gagal Disimpan!', null);
+        return new SubmissionResource(false, 'Data Submission Gagal Disimpan!', null);
     }
 
 
@@ -77,15 +82,15 @@ class SubmissionController extends Controller
      */
     public function show($id)
     {
-        $category = Category::whereId($id)->first();
+        $submission = Submission::whereId($id)->first();
 
-        if ($category) {
+        if ($submission) {
             //return success with Api Resource
-            return new CategoryResource(true, 'Detail Data Category!', $category);
+            return new SubmissionResource(true, 'Detail Data Submission!', $submission);
         }
 
         //return failed with Api Resource
-        return new CategoryResource(false, 'Detail Data Category Tidak Ditemukan!', null);
+        return new SubmissionResource(false, 'Detail Data Submission Tidak Ditemukan!', null);
     }
 
     /**
@@ -95,10 +100,10 @@ class SubmissionController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Submission $submission)
     {
         $validator = Validator::make($request->all(), [
-            'name'      => 'required|unique:categories,name,' . $category->id,
+            'nama'      => 'required|unique:submissions,nama,' . $submission->id,
         ]);
 
         if ($validator->fails()) {

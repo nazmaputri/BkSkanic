@@ -25,6 +25,13 @@ Route::group(['middleware' => 'auth:api'], function () {
 });
 Route::prefix('public')->group(function () {
    Route::post('/register', [App\Http\Controllers\Api\Auth\RegisterController::class, 'store']);
+
+   Route::post('/submission', [App\Http\Controllers\Api\Public\SubmissionController::class, 'store']);
+   
+   Route::get('/submission/index', [App\Http\Controllers\Api\Public\SubmissionController::class, 'index']);
+   
+   Route::get('/submission/show/{id}', [App\Http\Controllers\Api\Public\SubmissionController::class, 'show']);
+     
 });
 
 
