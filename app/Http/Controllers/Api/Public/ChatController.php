@@ -20,8 +20,8 @@ class ChatController extends Controller
     public function index()
     {
         $chats = Chat::with('user')->withCount('views')->when(request()->search, function($posts) {
-            $posts = $posts->where('title', 'like', '%'. request()->search . '%');
-        })->where('user_id', auth()->user()->id)->latest()->paginate(5);
+            $chats = $chats->where('penerima', 'like', '%'. request()->search . '%');
+        })->where('penerima', auth()->user()->id)->latest()->paginate(5);
 
         //append query string to paginate links
         $posts->appends(['search' => request()->search]);
@@ -39,10 +39,9 @@ class ChatController extends Controller
     public function store (Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image'       => 'required|image|mimes:jpeg,jpg,png|max:2000',
-            'title'       => 'required|unique:posts',
-            'category_id' => 'required',
-            'content'     => 'required'
+            'pengirim'       => 'required',
+            'penerima'       => 'required',
+            'pesan' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -51,23 +50,18 @@ class ChatController extends Controller
         }  
 
         //upload image
-        $image = $request->file('image');
-        $image->storeAs('public/posts', $image->hashName());
 
-        $post  = Post::create([
-            'image'       => $image->hashName(),
-            'title'       => $request->title,
-            'slug'        => Str::slug($request->title, '-'),
-            'category_id' => $request->category_id,
-            'user_id'     => auth()->guard('api')->user()->id,
-            'content'     => $request->content
+        $chat  = Chat::create([
+            'pengirim' => $request->pengirim,
+            'penerima' => $request->penerima,
+            'pesan'     => $request->pesan
         ]);
 
         //push notification firebase
         fcm()
             ->toTopic('push-notification')
             ->priority('normal')
-            ->timeToLive(0)
+            ->timeToLive(0)     
             ->notification([
                 'title' => 'Berita Baru !',
                 'body'  => 'Disini akan menampilkan judul berita baru',
@@ -75,13 +69,13 @@ class ChatController extends Controller
             ])
             ->send();
 
-        if($post) {
+        if($chat) {
             //return success with Api Resource
-            return new PostResource(true, 'Data Post Berhasil Disimpan!', $post);
+            return new ChatResource(true, 'Data Post Berhasil Disimpan!', $chat);
         }
 
         //return failed with Api Resource
-        return new PostResource(false, 'Data Post Gagal Disimpan', null);
+        return new ChatResource(false, 'Data Post Gagal Disimpan', null);
 
     }
 

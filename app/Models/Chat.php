@@ -10,10 +10,10 @@ class Chat extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id','chat',
+        'penerima','pengirim','pesan'
     ];
 
-    public function users(){
-        return $this->belongsTo(Users::class);
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }

@@ -28,7 +28,7 @@ class RegisterController extends Controller
         //return with Api Resource
         return new UserResource(true, 'List Data Users', $users);
     }
-    
+
     /**
      * Store a newly created resource in storage.
      * 
@@ -45,7 +45,7 @@ class RegisterController extends Controller
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
-        }   
+        }
 
         //create user
         $user = User::create([

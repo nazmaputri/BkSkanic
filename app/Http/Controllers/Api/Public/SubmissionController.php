@@ -40,13 +40,13 @@ class SubmissionController extends Controller
      public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama'  => 'required',
-            'email' => 'required',
-            'nama_siswa'  => 'required',
-            'kelas' => 'required',
-            'sebagai' => 'required', 
-            'deskripsi' => 'required', 
-            'masalah' => 'required', 
+            'nama'       => 'required',
+            'email'      => 'required',
+            'nama_siswa' => 'required',
+            'kelas'      => 'required',
+            'sebagai'    => 'required', 
+            'deskripsi'  => 'required', 
+            'masalah'    => 'required', 
         ]);
 
         if ($validator->fails()) {
@@ -55,13 +55,13 @@ class SubmissionController extends Controller
     
        
         $submission = Submission::create([
-            'nama'  => $request->nama,
-            'email' => $request->email,
-            'kelas' => $request->kelas,
+            'nama'        => $request->nama,
+            'email'       => $request->email,
+            'kelas'       => $request->kelas,
             'nama_siswa'  => $request->nama_siswa,
-            'sebagai' => $request->sebagai,
-            'deskripsi' => $request->deskripsi, 
-            'masalah' => $request->masalah, 
+            'sebagai'     => $request->sebagai,
+            'deskripsi'   => $request->deskripsi, 
+            'masalah'     => $request->masalah, 
         ]);
 
         if ($submission) {
@@ -104,6 +104,12 @@ class SubmissionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama'      => 'required|unique:submissions,nama,' . $submission->id,
+            'email'     => 'required',
+            'masalah'   => 'required',
+            'kelas'     => 'required',
+            'deskripsi' => 'required',
+            'sebagai'   => 'required',
+            'nama_siswa'=> 'required'
         ]);
 
         if ($validator->fails()) {
@@ -111,37 +117,25 @@ class SubmissionController extends Controller
         }
 
         //check image update
-        if ($request->file('image')) {
-
-            //remove old image
-            Storage::disk('local')->delete('public/categories/'.basename($category->image));
-
-            //upload new image
-            $image = $request->file('image');
-            $image->storeAs('public/categories', $image->hashName());
-
-            //update category with new image
-            $category->update([
-                'image' => $image->hashName(),
-                'name'  => $request->name,
-                'slug'  => Str::slug($request->name, '-'),
-            ]);
-
-    }
 
         //update category without image
-        $category->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name, '-'),
+        $submission->update([
+            'nama'      => $request->nama,
+            'nama_siswa'=> $request->nama_siswa,
+            'masalah'   => $request->masalah,
+            'kelas'     => $request->kelas,
+            'deskripsi' => $request->deskripsi,
+            'sebagai'   => $request->sebagai,
+            'email'     => $request->email
         ]);
 
-        if ($category) {
+        if ($submission) {
             //return success with Api Resource
-            return new CategoryResource(true, 'Data Category Berhasil Diupdate!', $category);
+            return new SubmissionResource(true, 'Data Category Berhasil Diupdate!', $submission);
         }
 
         //return failed with Api Resource
-        return new CategoryResource(false, 'Data Category Gagal Diupdate!', null);
+        return new SubmissionResource(false, 'Data Category Gagal Diupdate!', null);
     }
 
     /**
@@ -150,18 +144,17 @@ class SubmissionController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy(Submission $submission)
     {
         //remove image
-        Storage::disk('local')->delete('public/categories/'.basename($category->image));
-
-        if ($category->delete()) {
+       
+        if ($submission->delete()) {
             //return success with Api Resource
-            return new CategoryResource(true, 'Data Category Berhasil Dihapus', null);
+            return new SubmissionResource(true, 'Data Category Berhasil Dihapus', null);
         }
 
         //return failed with Api Resource
-        return new CategoryResource(false, 'Data Category Gagal Dihapus!', null);
+        return new SubmissionResource(false, 'Data Category Gagal Dihapus!', null);
     }
 
     /**

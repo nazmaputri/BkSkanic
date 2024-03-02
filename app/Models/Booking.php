@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Booking extends Model
 {
     protected $fillable = [
-        'user_id', 'booking_start', 'booking_end',
+        'id_users', 'booking_start', 'booking_end','name','email','no_telepon','problem','option','booking_date','consultation'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_users');
     }
 }
+        

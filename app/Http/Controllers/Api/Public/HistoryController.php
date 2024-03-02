@@ -39,10 +39,7 @@ class HistoryController extends Controller
     public function store (Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image'       => 'required|image|mimes:jpeg,jpg,png|max:2000',
-            'title'       => 'required|unique:posts',
-            'category_id' => 'required',
-            'content'     => 'required'
+            'history_booking'   => ''
         ]);
 
         if ($validator->fails()) {
