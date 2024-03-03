@@ -20,9 +20,11 @@
              */
             public function index()
             {
-                $bookings= Booking::with('user')->withCount('views')->when(request()->search, function($bookings) {
+                $bookings= Booking::with('user')
+                // ->withCount('views')
+                ->when(request()->search, function($bookings) {
                     $bookings = $bookings->where('title', 'like', '%'. request()->search . '%');
-                })->where('user_id', auth()->user()->id)->latest()->paginate(5);
+                })->where('id_users', auth()->user()->id)->latest()->paginate(5);
 
                 //append query string to paginate links
                 $bookings->appends(['search' => request()->search]);
@@ -50,6 +52,7 @@
                     'option'        => 'required',
                     'consultation'  => 'required',
                     'booking_date'  => 'required',
+                    'status'        => 'required'
 
                 ]);
 
@@ -71,6 +74,7 @@
                     'consultation'  => $request->consultation,
                     'booking_date'  => $request->booking_date,
                     'id_users'      => $request->id_users,
+                    'status'        => $request->status
 
                 ]);
 
@@ -135,8 +139,8 @@
             // Validasi input
             $validator = Validator::make($request->all(), [
                 'id_users'       => 'required|exists:users,id',
-                'booking_start'  => 'required|date',
-                'booking_end'    => 'required|date|after:booking_start',
+                'booking_start'  => 'required',
+                'booking_end'    => 'required',
                 'name'           => 'required',
                 'email'          => 'required',
                 'no_telepon'     => 'required',
@@ -144,6 +148,7 @@
                 'option'         => 'required',
                 'consultation'   => 'required',
                 'booking_date'   => 'required',
+                'status'         => 'required'
             ]);
 
             // Jika validasi gagal, kembalikan response error 422
@@ -163,6 +168,7 @@
                 'option'         => $request->input('option'),
                 'consultation'   => $request->input('consultation'),
                 'booking_date'   => $request->input('booking_date'),
+                'status'         => $request->input('status')
             ]);
 
             // Jika booking berhasil diperbarui, kembalikan response sukses dengan data booking yang diperbarui

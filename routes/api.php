@@ -22,10 +22,19 @@ Route::post('/login', [App\Http\Controllers\Api\Auth\LoginController::class, 'in
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [App\Http\Controllers\Api\Auth\LoginController::class, 'logout']);
+    Route::get('/chats', [App\Http\Controllers\Api\Public\ChatController::class, 'index']);
+    Route::get('/chats/{id}', [App\Http\Controllers\Api\Public\ChatController::class, 'show']);
+
 });
 Route::prefix('public')->group(function () {
    Route::post('/register', [App\Http\Controllers\Api\Auth\RegisterController::class, 'store']);
+   Route::post('/chats', [App\Http\Controllers\Api\Public\ChatController::class, 'store']);
 
+    // Rute untuk menampilkan daftar percakapan
+    
+
+    // Rute untuk menampilkan detail percakapan berdasarkan ID
+   
    Route::post('/submission', [App\Http\Controllers\Api\Public\SubmissionController::class, 'store']);
    
    Route::get('/submission/index', [App\Http\Controllers\Api\Public\SubmissionController::class, 'index']);

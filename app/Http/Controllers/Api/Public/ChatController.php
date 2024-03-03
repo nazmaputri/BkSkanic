@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Public;
 use App\Models\Chat;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -19,15 +20,20 @@ class ChatController extends Controller
      */
     public function index()
     {
-        $chats = Chat::with('user')->withCount('views')->when(request()->search, function($posts) {
-            $chats = $chats->where('penerima', 'like', '%'. request()->search . '%');
-        })->where('penerima', auth()->user()->id)->latest()->paginate(5);
+        $chats = Chat::with('user')
+            ->when(request()->search, function($query) {
+                return $query->where('penerima', 'like', '%'. request()->search . '%')
+                             ->orWhere('pengirim', 'like', '%'. request()->search . '%');
+            })
+            ->where('penerima', auth()->user()->id)->orWhere('pengirim', auth()->user()->id)
+            ->latest()
+            ->paginate();
 
         //append query string to paginate links
-        $posts->appends(['search' => request()->search]);
+        $chats->appends(['search' => request()->search]);
 
         //return with Api Resource
-        return new PostResource(true, 'List Data Posts', $posts);
+        return new ChatResource(true, 'List Data Posts', $chats);
     }
 
     /**
@@ -41,7 +47,7 @@ class ChatController extends Controller
         $validator = Validator::make($request->all(), [
             'pengirim'       => 'required',
             'penerima'       => 'required',
-            'pesan' => 'required',
+            'chat' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -54,7 +60,7 @@ class ChatController extends Controller
         $chat  = Chat::create([
             'pengirim' => $request->pengirim,
             'penerima' => $request->penerima,
-            'pesan'     => $request->pesan
+            'chat'     => $request->chat
         ]);
 
         //push notification firebase
@@ -86,17 +92,23 @@ class ChatController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        $post = Post::with('category')->whereId($id)->first();
+{
+    $chat = Chat::where('id', $id)
+                ->where(function($query) {
+                    $query->where('penerima', auth()->user()->id)
+                          ->orWhere('pengirim', auth()->user()->id);
+                })
+                ->first();
 
-        if($post) {
-            //return success with APi Resource
-            return new PostResource(true, 'Detail Data Post', $post);
-        }
-
-        //return failed with Api Resource
-        return new PostResource(false, 'Detail Data Post Tidak Ditemukan', null);
+    if ($chat) {
+        // Jika chat ditemukan
+        return new ChatResource(true, 'Data Chat berhasil ditemukan!', $chat);
     }
+
+    // Jika chat tidak ditemukan
+    return new ChatResource(false, 'Data Chat tidak ditemukan', null);
+}
+
 
     /**
      * Update the specified resource in storage
