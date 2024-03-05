@@ -24,7 +24,7 @@
                 // ->withCount('views')
                 ->when(request()->search, function($bookings) {
                     $bookings = $bookings->where('title', 'like', '%'. request()->search . '%');
-                })->where('id_users', auth()->user()->id)->latest()->paginate(5);
+                })->where('id_users', auth()->user()->id)->latest()->paginate(10000);
 
                 //append query string to paginate links
                 $bookings->appends(['search' => request()->search]);

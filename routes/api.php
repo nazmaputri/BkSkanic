@@ -49,6 +49,6 @@ Route::prefix('admin')->group(function () {
     Route::group(['middleware' => 'auth:api'], function() {
         Route::apiResource('/users', 'App\Http\Controllers\Api\Admin\UserController')->middleware('permission:users.index|users.store|users.update|users.delete');
         Route::apiResource('/submissions', 'App\Http\Controllers\Api\Public\SubmissionController')->middleware('permission:users.index|users.store|users.update|users.delete');
-        Route::apiResource('/bookings', 'App\Http\Controllers\Api\Public\BookingController')->middleware('permission:users.index|users.store|users.update|users.delete');
+        Route::apiResource('/bookings', 'App\Http\Controllers\Api\Public\BookingController');
     });
 });

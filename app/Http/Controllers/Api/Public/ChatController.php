@@ -27,7 +27,7 @@ class ChatController extends Controller
             })
             ->where('penerima', auth()->user()->id)->orWhere('pengirim', auth()->user()->id)
             ->latest()
-            ->paginate();
+            ->paginate(1000);
 
         //append query string to paginate links
         $chats->appends(['search' => request()->search]);
